@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Potensi Jasa Konstruksi — KC Medan Kota</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --g-950: #002818;
+      --g-900: #003D22;
+      --g-800: #00532E;
+      --g-700: #00703C;
+      --g-600: #fff5a9;
+      --g-500: #10b981;
+      --g-400: #34d399;
+      --g-300: #6ee7b7;
+      --g-100: #d1fae5;
+      --g-50:  #ecfdf5;
+
+      --gold:    #F5A623;
+      --gold-lt: #FEF3C7;
+      --gold-dk: #92400e;
+
+      --navy-900: #001f4d;
+      --navy-800: #003070;
+      --navy-700: #003F8A;
+      --navy-500: #1d63cc;
+      --navy-400: #3b82f6;
+      --navy-300: #93c5fd;
+      --navy-100: #dbeafe;
+
+      --red:    #ef4444;
+      --red-lt: #fee2e2;
+      --red-dk: #991b1b;
+
+      background-image: url('asset/gelap.jpg');
+      --surface:  #ffffff;
+      --surface-2:#f6faf8;
+      --border:   #d1e8da;
+      --text-1:   #0d1f14;
+      --text-2:   #3d5a47;
+      --text-3:   #7a9e89;
+
+      --shadow-sm: 0 1px 3px rgba(0,80,40,0.06),0 1px 2px rgba(0,80,40,0.04);
+      --shadow-md: 0 4px 16px rgba(0,80,40,0.09),0 1px 4px rgba(0,80,40,0.05);
+      --shadow-lg: 0 10px 32px rgba(0,80,40,0.13),0 2px 8px rgba(0,80,40,0.07);
+      --radius-sm: 8px;
+      --radius:    12px;
+      --radius-lg: 16px;
+
+      --font: 'Plus Jakarta Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+      --nav-h: 68px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text-1); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ===================== TOPNAV ===================== */
+    .topnav {
+      position: sticky; top: 0; z-index: 100;
+      min-height: var(--nav-h);
+      background: linear-gradient(135deg, #0a1628 0%, #0f2a5e 45%, #3777f7 70%, #ffffff 100%);
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 28px;
+      box-shadow: 0 2px 24px rgba(5,20,60,0.45);
+      flex-wrap: wrap;
+    }
+    .topnav::before { content: none; }
+    .topnav::after  { content: none; }
+
+    .nav-brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .nav-brand-logos { display: flex; align-items: center; gap: 6px; }
+    .nav-brand-logos img { height: 38px; width: auto; border-radius: 6px; object-fit: contain; }
+    .nav-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+    .nav-brand-text { display: flex; flex-direction: column; }
+    .nav-brand-text .title    { font-size: 0.82rem; font-weight: 800; color: #fff; line-height: 1.5; }
+    .nav-brand-text .subtitle { font-size: 0.55rem; color: #b8ccee; margin-top: 2px; }
+
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .nav-link {
+      padding: 8px 18px; border-radius: var(--radius-sm);
+      font-size: 0.82rem; font-weight: 700;
+      color: rgba(255,255,255,0.6); transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .nav-link:hover  { background: rgba(255,255,255,0.1); color: #fff; }
+    .nav-link.active { background: rgba(255,255,255,0.14); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18); }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-shrink: 0; flex-wrap: wrap; }
+    .nav-status { display: flex; align-items: center; gap: 8px; }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #6ee7b7; box-shadow: 0 0 0 3px rgba(110,231,183,0.25);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100%{ box-shadow: 0 0 0 3px rgba(110,231,183,0.25); }
+      50%    { box-shadow: 0 0 0 6px rgba(110,231,183,0.1); }
+    }
+    .status-dot.loading { background: var(--gold); box-shadow: 0 0 0 3px rgba(245,166,35,0.25); animation: none; }
+    .status-dot.error   { background: var(--red);  box-shadow: 0 0 0 3px rgba(239,68,68,0.25);  animation: none; }
+    .status-text      { font-size: 0.72rem; font-weight: 500; color: #b8ccee; font-family: var(--mono); }
+    .nav-timestamp    { font-size: 0.68rem; color: rgb(255, 255, 255); font-family: var(--mono); white-space: nowrap; }
+
+    .btn-refresh {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius-sm); color: #fff; font-size: 0.78rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; font-family: var(--font);
+      white-space: nowrap;
+    }
+    .btn-refresh:hover { background: rgba(255,255,255,0.18); }
+    .btn-refresh svg { transition: transform 0.45s; }
+    .btn-refresh:hover svg { transform: rotate(180deg); }
+    .nav-right-logos { display: flex; align-items: center; gap: 6px; }
+    .nav-right-logos img { height: 30px; border-radius: 5px; object-fit: contain; }
+
+    /* ===================== SUBHEADER ===================== */
+    .subheader-wrap {
+      display: flex; justify-content: center;
+      padding: 16px 28px 0;
+      position: relative; z-index: 10;
+    }
+    .subheader {
+      background: rgba(22, 24, 30, 0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px;
+      padding: 8px 24px;
+      display: inline-flex; align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.06) inset;
+    }
+    .subheader-title { font-size: 0.88rem; font-weight: 800; color: #e8e8e8; letter-spacing: -0.01em; white-space: nowrap; }
+    .subheader-title span { color: var(--gold); }
+
+    /* ===================== CAROUSEL ===================== */
+    .carousel-section {
+      padding: 18px 28px 0;
+      position: relative;
+    }
+
+    .carousel-wrapper {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,40,20,0.22), 0 2px 8px rgba(0,40,20,0.1), 0 0 0 1px rgba(0,112,60,0.2);
+      background: #001a0e;
+      height: 300px;
+    }
+
+    .carousel-wrapper::before,
+    .carousel-wrapper::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 80px;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .carousel-wrapper::before {
+      left: 0;
+      background: linear-gradient(to right, rgba(0,26,14,0.55), transparent);
+    }
+    .carousel-wrapper::after {
+      right: 0;
+      background: linear-gradient(to left, rgba(0,26,14,0.55), transparent);
+    }
+
+    .carousel-track {
+      display: flex;
+      height: 100%;
+      transition: transform 0.65s cubic-bezier(0.77, 0, 0.175, 1);
+      will-change: transform;
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.78) saturate(1.1);
+      transition: filter 0.6s ease;
+    }
+    .carousel-slide.active img {
+      filter: brightness(0.88) saturate(1.15);
+    }
+
+    .carousel-slide::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        160deg,
+        transparent 30%,
+        rgba(0,20,10,0.55) 70%,
+        rgba(0,10,5,0.82) 100%
+      );
+      pointer-events: none;
+    }
+
+    .slide-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 18px 22px 16px;
+      z-index: 4;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .caption-text-col { min-width: 0; }
+    .caption-tag {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #fff;
+      background: var(--g-700);
+      border-radius: 999px;
+      padding: 2px 9px;
+      margin-bottom: 5px;
+      box-shadow: 0 2px 8px rgba(0,112,60,0.5);
+    }
+    .caption-tag.gold { background: var(--gold); box-shadow: 0 2px 8px rgba(245,166,35,0.5); }
+    .caption-tag.navy { background: var(--navy-700); box-shadow: 0 2px 8px rgba(0,63,138,0.5); }
+    .caption-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+      text-shadow: 3px 3px 12px rgba(0,0,0,0.5);
+      margin-bottom: 3px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 480px;
+    }
+    .caption-sub {
+      font-size: 0.8rem;
+      color: rgb(255, 242, 0);
+      font-family: var(--mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 720px;
+    }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.22);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      outline: none;
+    }
+    .carousel-btn:hover {
+      background: rgba(255,255,255,0.28);
+      border-color: rgba(255,255,255,0.45);
+      transform: translateY(-50%) scale(1.08);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+    }
+    .carousel-btn:active { transform: translateY(-50%) scale(0.96); }
+    .carousel-btn.prev { left: 14px; }
+    .carousel-btn.next { right: 14px; }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 42px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      z-index: 10;
+    }
+    .carousel-dot {
+      width: 6px; height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.35);
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      border: none; padding: 0; outline: none;
+    }
+    .carousel-dot.active {
+      background: #fff;
+      width: 22px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    .carousel-progress {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.12);
+      z-index: 10;
+      overflow: hidden;
+    }
+    .carousel-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--g-400), var(--gold));
+      border-radius: 999px;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 10px rgba(52,211,153,0.6);
+    }
+
+    .carousel-wrapper:hover .carousel-progress-bar {
+      animation-play-state: paused;
+    }
+
+    /* ===================== MAIN ===================== */
+    .main { padding: 24px 28px; max-width: 1440px; margin: 0 auto; }
+
+    /* ===================== KPI CARDS ===================== */
+    .summary-row {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 18px; margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--surface); border-radius: var(--radius-lg);
+      padding: 14px 16px; box-shadow: var(--shadow-md);
+      position: relative; overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .kpi-a {
+      border: 3.5px solid rgba(0,112,60,0.75);
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(52,211,153,0.2), inset 0 0 28px rgba(0,112,60,0.07);
+    }
+    .kpi-b {
+      border: 3.5px solid rgba(29,99,204,0.7);
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(59,130,246,0.2), inset 0 0 28px rgba(29,99,204,0.07);
+    }
+    .kpi-c {
+      border: 3.5px solid rgba(245,166,35,0.75);
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(245,166,35,0.25), inset 0 0 28px rgba(245,166,35,0.08);
+    }
+    .kpi-card:hover { transform: translateY(-2px); }
+    .kpi-a:hover { box-shadow: var(--shadow-lg), 0 0 0 3px rgba(52,211,153,0.35), 0 0 24px rgba(0,112,60,0.2); }
+    .kpi-b:hover { box-shadow: var(--shadow-lg), 0 0 0 3px rgba(59,130,246,0.35), 0 0 24px rgba(29,99,204,0.2); }
+    .kpi-c:hover { box-shadow: var(--shadow-lg), 0 0 0 3px rgba(245,166,35,0.4), 0 0 24px rgba(245,166,35,0.22); }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .kpi-a::before { background: linear-gradient(90deg, var(--g-700), var(--g-400)); }
+    .kpi-b::before { background: linear-gradient(90deg, var(--navy-700), var(--navy-400)); }
+    .kpi-c::before { background: linear-gradient(90deg, var(--gold), #fcd34d); }
+
+    .kpi-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .kpi-a .kpi-icon { background: var(--g-100); }
+    .kpi-b .kpi-icon { background: var(--navy-100); }
+    .kpi-c .kpi-icon { background: var(--gold-lt); }
+
+    .kpi-info { min-width: 0; }
+    .kpi-label { font-size: 0.67rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
+    .kpi-value { font-size: 1.25rem; font-weight: 800; color: var(--text-1); line-height: 1; letter-spacing: -0.02em; }
+    .kpi-value.mono { font-family: var(--mono); font-size: 0.9rem; font-weight: 500; }
+    .kpi-sub { font-size: 0.65rem; color: var(--text-3); margin-top: 2px; }
+
+    /* ===================== PANEL ===================== */
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      border: 2px solid var(--border);
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .panel:has(#statusChart),
+    .panel:has(#statusLegend) {
+      border: 3.5px solid rgba(0,112,60,0.65);
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(52,211,153,0.15), inset 0 0 32px rgba(0,112,60,0.05);
+    }
+    .panel:has(#statusChart):hover {
+      box-shadow: var(--shadow-lg), 0 0 0 3px rgba(52,211,153,0.3), 0 0 28px rgba(0,112,60,0.15);
+    }
+
+    .panel:has(#sumberDanaChart) {
+      border: 3.5px solid rgba(245,166,35,0.7);
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(245,166,35,0.2), inset 0 0 32px rgba(245,166,35,0.05);
+    }
+    .panel:has(#sumberDanaChart):hover {
+      box-shadow: var(--shadow-lg), 0 0 0 3px rgba(245,166,35,0.35), 0 0 28px rgba(245,166,35,0.18);
+    }
+
+    .table-panel {
+      border: 3.5px solid rgba(29,99,204,0.65) !important;
+      box-shadow: var(--shadow-md), 0 0 0 1px rgba(59,130,246,0.15), inset 0 0 32px rgba(29,99,204,0.05) !important;
+    }
+    .table-panel:hover {
+      box-shadow: var(--shadow-lg), 0 0 0 3px rgba(59,130,246,0.3), 0 0 28px rgba(29,99,204,0.15) !important;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      flex-wrap: wrap; gap: 10px;
+    }
+    .panel-title {
+      font-size: 0.84rem; font-weight: 800; color: var(--text-1);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ptdot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .panel-badge {
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 0.67rem; font-weight: 700;
+      background: var(--g-100); color: var(--g-700);
+    }
+    .panel-body { padding: 14px 16px; }
+
+    /* ===================== SEARCH INPUT ===================== */
+    .search-input {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-family: var(--font);
+      font-size: 0.72rem;
+      color: var(--text-1);
+      outline: none;
+      min-width: 180px;
+      transition: all 0.2s;
+    }
+    .search-input::placeholder { color: #6971ff; }
+    .search-input:focus {
+      border-color: var(--navy-400);
+      box-shadow: 0 0 0 3px var(--navy-100);
+    }
+
+    /* ===================== SORT BUTTONS ===================== */
+    .sort-controls {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sort-btn {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-family: var(--font); font-size: 0.68rem; font-weight: 700;
+      color: var(--text-2); cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .sort-btn:hover { border-color: var(--g-500); color: var(--g-700); background: var(--g-50); }
+    .sort-btn.active {
+      background: var(--g-700); color: #fff; border-color: var(--g-700);
+    }
+    .sort-btn.active.desc .sort-arrow { transform: rotate(180deg); }
+    .sort-arrow { display: inline-block; transition: transform 0.2s; font-size: 0.7rem; line-height: 1; }
+
+    /* ===================== CHARTS ROW ===================== */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-bottom: 24px;
+    }
+
+    .chart-inner { display: flex; gap: 12px; align-items: stretch; }
+    .chart-canvas-wrap { flex: 1; min-width: 0; height: 220px; position: relative; }
+    .chart-legend-col  {
+      width: 155px; flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 5px;
+      overflow-y: auto; max-height: 220px;
+    }
+
+    .legend-item {
+      padding: 7px 10px; border-radius: var(--radius-sm);
+      background: var(--surface-2); border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.18s;
+    }
+    .legend-item:hover { border-color: var(--g-500); transform: translateX(2px); box-shadow: var(--shadow-sm); }
+    .legend-item.g-ac  { border-left: 3px solid var(--g-700); }
+    .legend-item.n-ac  { border-left: 3px solid var(--navy-500); }
+    .legend-item.r-ac  { border-left: 3px solid var(--red); }
+    .legend-item.gd-ac { border-left: 3px solid var(--gold); }
+    .legend-item.cy-ac { border-left: 3px solid #06b6d4; }
+    .legend-item.gr-ac { border-left: 3px solid #9ca3af; }
+
+    /* Teks legend — sama persis di kedua widget */
+    .legend-label { font-size: 0.69rem; font-weight: 700; color: var(--text-1); margin-bottom: 2px; }
+    .legend-count { font-size: 0.88rem; font-weight: 800; color: var(--text-1); }
+    .legend-iuran { font-size: 0.63rem; color: var(--text-2); font-family: var(--mono); }
+    .legend-pct   { font-size: 0.63rem; color: var(--text-3); }
+
+    /* ── Highlighted count row khusus Status Potensi ── */
+    .legend-count-row {
+      display: flex; align-items: center; gap: 6px;
+      margin: 4px 0 3px;
+    }
+    .legend-count-num {
+      font-size: 1.1rem; font-weight: 800; line-height: 1;
+      letter-spacing: -0.02em; font-family: var(--mono);
+    }
+    .legend-count-unit {
+      font-size: 0.67rem; font-weight: 700; color: var(--text-3);
+      margin-top: 2px; align-self: flex-end;
+    }
+    .legend-pct-badge {
+      display: inline-flex; align-items: center;
+      padding: 1px 7px; border-radius: 999px;
+      font-size: 0.65rem; font-weight: 800;
+      margin-left: auto;
+    }
+    /* Per-status colours */
+    .g-ac  .legend-count-num { color: var(--g-700); }
+    .r-ac  .legend-count-num { color: var(--red); }
+    .gr-ac .legend-count-num { color: #6b7280; }
+    .g-ac  .legend-pct-badge { background: var(--g-100);  color: var(--g-700); }
+    .r-ac  .legend-pct-badge { background: var(--red-lt); color: var(--red-dk); }
+    .gr-ac .legend-pct-badge { background: #f3f4f6;       color: #374151; }
+
+    /* ===================== TABLE ===================== */
+    .table-panel { width: 100%; }
+
+    .table-scroll { overflow-y: auto; max-height: 420px; min-height: 280px; }
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table thead th {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--g-900);
+      color: rgba(255,255,255,0.9);
+      font-size: 0.67rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 9px 14px; white-space: nowrap;
+      border-bottom: 2px solid var(--g-800);
+      user-select: none;
+    }
+    .data-table thead th:first-child { text-align: center; width: 52px; }
+    .data-table thead th:last-child  { text-align: center; width: 90px; }
+    .data-table thead th.col-nilai   { width: 200px; }
+
+    .data-table thead th.sortable { cursor: pointer; }
+    .data-table thead th.sortable:hover { background: var(--g-800); }
+    .data-table thead th .th-inner { display: inline-flex; align-items: center; gap: 5px; }
+    .th-sort-icon { font-size: 0.65rem; opacity: 0.5; transition: opacity 0.2s; }
+    .data-table thead th.sort-asc .th-sort-icon,
+    .data-table thead th.sort-desc .th-sort-icon { opacity: 1; color: var(--g-300); }
+    .data-table thead th.sort-asc  .th-sort-icon::after { content: '▲'; }
+    .data-table thead th.sort-desc .th-sort-icon::after { content: '▼'; }
+    .data-table thead th:not(.sort-asc):not(.sort-desc) .th-sort-icon::after { content: '⇅'; }
+
+    .data-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .data-table tbody tr:hover { background: var(--g-50); }
+    .data-table tbody tr:nth-child(even) { background: var(--surface-2); }
+    .data-table tbody tr:nth-child(even):hover { background: var(--g-50); }
+
+    .data-table td { padding: 8px 14px; font-size: 0.78rem; vertical-align: middle; }
+    .data-table td:first-child { text-align: center; font-size: 0.7rem; font-family: var(--mono); color: var(--text-3); font-weight: 700; }
+    .data-table td:last-child  { text-align: center; }
+    .data-table td.col-nilai   { font-family: var(--mono); font-size: 0.75rem; color: var(--text-2); white-space: nowrap; }
+
+    .nilai-wrap { display: flex; flex-direction: column; gap: 3px; }
+    .nilai-text { font-family: var(--mono); font-size: 0.74rem; color: var(--text-2); }
+    .nilai-bar-bg { height: 4px; border-radius: 999px; background: var(--border); overflow: hidden; }
+    .nilai-bar    { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--g-700), var(--g-400)); transition: width 0.6s ease; }
+
+    .inst-name {
+      font-weight: 700; color: var(--g-700);
+      display: block; overflow: hidden; text-overflow: ellipsis;
+      white-space: nowrap; transition: color 0.15s;
+    }
+    .inst-name:hover { color: var(--g-500); }
+    .inst-sub { font-size: 0.68rem; color: var(--text-3); font-family: var(--mono); margin-top: 1px; }
+
+    .badge-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 30px; padding: 3px 10px; border-radius: 999px;
+      background: var(--g-100); color: var(--g-700);
+      font-size: 0.72rem; font-weight: 800;
+    }
+
+    /* ===================== SKELETON ===================== */
+    .skeleton {
+      background: linear-gradient(90deg, #c6dfd1 25%, #e0f2e9 50%, #c6dfd1 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite; border-radius: 6px;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ===================== FADE UP ===================== */
+    .fade-up { opacity:0; transform:translateY(12px); animation: fadeUp 0.45s ease forwards; }
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+    .fade-up:nth-child(1){animation-delay:0.05s}
+    .fade-up:nth-child(2){animation-delay:0.11s}
+    .fade-up:nth-child(3){animation-delay:0.17s}
+    .fade-up.delay-4 { animation-delay:0.24s; }
+
+    /* ===================== FOOTER ===================== */
+    .site-footer {
+      background: linear-gradient(135deg, #0a1628 0%, #0f2a5e 45%, #397bfe 70%, #ffffff 100%);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      margin-top: 28px; padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .footer-links-group {
+      display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap;
+    }
+    .footer-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px; background: #ffffff; color: #0f2a5e;
+      border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 800;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .footer-link:hover { background: #f0f4ff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,255,255,0.2); }
+    .footer-link.green { color: #003D22; }
+    .footer-link.green:hover { background: #ecfdf5; }
+    .footer-copy { font-weight: bolder; font-size: 0.78rem; color: rgba(0, 0, 0, 0.55); white-space: nowrap; }
+
+    /* ===================== SCROLLBAR ===================== */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #565656; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--g-500); }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 1024px) {
+      .nav-right-logos { display: none; }
+    }
+
+    @media (max-width: 860px) {
+      .charts-row { grid-template-columns: 1fr; }
+      .chart-inner { flex-direction: column; }
+      .chart-legend-col { width:100%; flex-direction:row; flex-wrap:wrap; max-height:none; }
+      .legend-item { flex:1 1 calc(50% - 6px); min-width:120px; }
+      .search-input { min-width: 140px; width: 100%; }
+      .panel-header { gap: 8px; }
+      .sort-controls { flex-wrap: wrap; }
+    }
+
+    @media (max-width: 768px) {
+      .topnav { padding: 8px 16px; gap: 8px; }
+      .nav-links { order: 3; width: 100%; justify-content: flex-start; }
+      .nav-right { flex: 1; justify-content: flex-end; }
+      .nav-divider.nav-div-links { display: none; }
+      .nav-timestamp { display: none; }
+      .site-footer { padding: 12px 16px; }
+      .footer-links-group { gap: 6px; }
+      .footer-link { padding: 7px 10px; font-size: 0.72rem; }
+      .footer-copy { font-size: 0.70rem; }
+      .carousel-wrapper { height: 170px; }
+      .caption-title { font-size: 0.82rem; max-width: 240px; }
+      .caption-sub { display: none; }
+      .summary-row { gap: 14px; margin-bottom: 18px; }
+      .charts-row { gap: 18px; margin-bottom: 18px; }
+    }
+
+    @media (max-width: 680px) {
+      :root { --nav-h: auto; }
+      .main { padding: 16px 16px; }
+      .summary-row { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+      .charts-row { gap: 14px; margin-bottom: 16px; }
+      .nav-brand-text .subtitle { display: none; }
+      .subheader-title { font-size: 0.75rem; }
+      .subheader { padding: 7px 16px; }
+      .carousel-section { padding: 12px 16px 0; }
+      .carousel-wrapper { height: 150px; }
+    }
+
+    @media (max-width: 520px) {
+      .footer-copy { display: none; }
+      .footer-links-group { width: 100%; justify-content: center; }
+      .footer-link { flex: 1; justify-content: center; font-size: 0.70rem; }
+    }
+
+    @media (max-width: 420px) {
+      .legend-item { flex: 1 1 100%; }
+      .nav-brand-logos img { height: 28px; }
+      .topnav { padding: 8px 12px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="topnav">
+    <div class="nav-brand">
+      <div class="nav-brand-logos">
+        <img src="asset/medan.png"     alt="Kota Medan" onerror="this.style.display='none'">
+        <img src="asset/pemprovsu.png" alt="Pemprovsu"  onerror="this.style.display='none'">
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-brand-text">
+        <span class="title">BPJS Ketenagakerjaan</span>
+        <span class="subtitle">KC Medan Kota/B00</span>
+        <span class="subtitle">Segmen / Jasa Konstruksi</span>
+      </div>
+    </div>
+
+    <div class="nav-divider nav-div-links"></div>
+
+    <div class="nav-links">
+      <a href="index.html"    class="nav-link active">Home</a>
+      <a href="topworst.html" class="nav-link">Leaderboard</a>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-status">
+        <div class="status-dot loading" id="statusDot"></div>
+        <span class="status-text" id="statusText">Memuat…</span>
+      </div>
+      <span class="nav-timestamp" id="navTimestamp"></span>
+      <button class="btn-refresh" id="btnRefresh">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/>
+          <path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/>
+        </svg>
+        Refresh
+      </button>
+      <div class="nav-right-logos">
+        <img src="asset/mdnsemua.png"     alt="Medan Untuk Semua" onerror="this.style.display='none'">
+        <img src="asset/logo.png"         alt="BPJS"              onerror="this.style.display='none'">
+        <img src="asset/sumut-berkah.png" alt="Sumut Berkah"      onerror="this.style.display='none'">
+      </div>
+    </div>
+  </nav>
+
+  <div class="subheader-wrap">
+    <div class="subheader">
+      <h1 class="subheader-title">Dashboard Potensi <span>Jasa Konstruksi</span> — Kantor Cabang Medan Kota</h1>
+    </div>
+  </div>
+
+  <!-- ===================== IMAGE CAROUSEL ===================== -->
+  <div class="carousel-section">
+    <div class="carousel-wrapper" id="carouselWrapper">
+      <div class="carousel-track" id="carouselTrack"></div>
+      <button class="carousel-btn prev" id="carouselPrev" aria-label="Sebelumnya">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <button class="carousel-btn next" id="carouselNext" aria-label="Berikutnya">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </button>
+      <div class="carousel-dots" id="carouselDots"></div>
+      <div class="carousel-progress">
+        <div class="carousel-progress-bar" id="carouselProgressBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <main class="main">
+
+    <div class="summary-row">
+      <div class="kpi-card kpi-a fade-up">
+        <div class="kpi-icon">🏗️</div>
+        <div class="kpi-info">
+          <div class="kpi-label">Total Proyek</div>
+          <div class="kpi-value" id="totalProjects">—</div>
+          <div class="kpi-sub">Proyek terdaftar aktif</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-b fade-up">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-info">
+          <div class="kpi-label">Total Nilai Proyek</div>
+          <div class="kpi-value mono" id="totalValue">—</div>
+          <div class="kpi-sub">Akumulasi seluruh proyek</div>
+        </div>
+      </div>
+      <div class="kpi-card kpi-c fade-up">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-info">
+          <div class="kpi-label">Potensi Iuran</div>
+          <div class="kpi-value mono" id="potensiValue">—</div>
+          <div class="kpi-sub">Estimasi iuran keseluruhan</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+
+      <div class="panel fade-up">
+        <div class="panel-header">
+          <span class="panel-title">
+            <span class="ptdot" style="background:var(--g-700)"></span>
+            Status Potensi
+          </span>
+          <span class="panel-badge" id="statusBadge">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-inner">
+            <div class="chart-canvas-wrap"><canvas id="statusChart"></canvas></div>
+            <div class="chart-legend-col" id="statusLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel fade-up">
+        <div class="panel-header">
+          <span class="panel-title">
+            <span class="ptdot" style="background:var(--gold)"></span>
+            Sumber Anggaran
+          </span>
+          <span class="panel-badge" id="danaBadge">—</span>
+        </div>
+        <div class="panel-body">
+          <div class="chart-inner">
+            <div class="chart-canvas-wrap"><canvas id="sumberDanaChart"></canvas></div>
+            <div class="chart-legend-col" id="danaLegend"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="panel table-panel fade-up delay-4">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="ptdot" style="background:var(--navy-500)"></span>
+          Pemilik Proyek
+        </span>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <input type="text" id="tableSearch" class="search-input" placeholder="🔎 Cari Instansi / Satker..." autocomplete="off">
+          <span class="panel-badge" id="tableBadge">—</span>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Instansi / Satker</th>
+              <th class="col-nilai sortable" id="thNilai">
+                <span class="th-inner">Total Nilai Proyek <span class="th-sort-icon"></span></span>
+              </th>
+              <th class="sortable" id="thJumlah" style="text-align:center;">
+                <span class="th-inner">Jml Proyek <span class="th-sort-icon"></span></span>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="mainTableBody">
+            <tr><td colspan="4">
+              <div style="display:flex;flex-direction:column;gap:8px;padding:8px 0">
+                <div class="skeleton" style="height:13px;width:100%"></div>
+                <div class="skeleton" style="height:13px;width:88%"></div>
+                <div class="skeleton" style="height:13px;width:93%"></div>
+                <div class="skeleton" style="height:13px;width:76%"></div>
+                <div class="skeleton" style="height:13px;width:82%"></div>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-links-group">
+      <a href="https://docs.google.com/spreadsheets/d/1ky92mACIpm11IRHr6qzqaEPXdsIMZsunmUSaSbRcdvY/edit?gid=0#gid=0"
+        target="_blank" class="footer-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        E-Document Jakon 2026
+      </a>
+      <a href="https://ejakon.bpjsketenagakerjaan.go.id/"
+        target="_blank" class="footer-link green">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        </svg>
+        Pendaftaran
+      </a>
+      <a href="https://www.bpjsketenagakerjaan.go.id/jasa-konstruksi.html"
+        target="_blank" class="footer-link green">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        Info Kepesertaan
+      </a>
+    </div>
+    <span class="footer-copy">BPJS Ketenagakerjaan — Kantor Cabang Medan Kota</span>
+  </footer>
+
+  <script>
+  Chart.register(ChartDataLabels);
+
+  const CAROUSEL_SLIDES = [
+    {
+      src:   'asset/carousel1.jpg',
+      fallback: 'https://picsum.photos/seed/jakon1/1200/400',
+      tag:   'Jasa Konstruksi',
+      tagType: '',
+      title: 'Pendaftaran Proyek Konstruksi 2025',
+      sub:   'Daftarkan proyek Anda melalui E-Jakon BPJS Ketenagakerjaan'
+    },
+    {
+      src:   'asset/carousel2.jpg',
+      fallback: 'https://picsum.photos/seed/jakon2/1200/400',
+      tag:   'Perlindungan Pekerja',
+      tagType: 'gold',
+      title: 'Lindungi Tenaga Kerja di Proyek Anda',
+      sub:   'Jaminan Kecelakaan Kerja & Jaminan Kematian untuk semua pekerja'
+    },
+    {
+      src:   'asset/carousel3.jpg',
+      fallback: 'https://picsum.photos/seed/jakon3/1200/400',
+      tag:   'KC Medan Kota',
+      tagType: 'navy',
+      title: 'Kantor Cabang Medan Kota Siap Melayani',
+      sub:   'Konsultasi & pendaftaran proyek konstruksi wilayah Medan Kota'
+    },
+    {
+      src:   'asset/carousel4.jpg',
+      fallback: 'https://picsum.photos/seed/jakon4/1200/400',
+      tag:   'Target 2025',
+      tagType: 'gold',
+      title: 'Optimalisasi Potensi Iuran Jasa Konstruksi',
+      sub:   'Bersama memastikan perlindungan 100% tenaga kerja konstruksi'
+    },
+    {
+      src:   'asset/carousel5.jpg',
+      fallback: 'https://picsum.photos/seed/jakon5/1200/400',
+      tag:   'E-Jakon',
+      tagType: '',
+      title: 'Daftarkan & Pantau Proyek Secara Online',
+      sub:   'ejakon.bpjsketenagakerjaan.go.id — mudah, cepat, terpercaya'
+    },
+  ];
+
+  const AUTOPLAY_INTERVAL = 4500;
+  let currentSlide = 0;
+  let autoplayTimer = null;
+  let progressStart = null;
+  let progressRAF   = null;
+  let isPaused = false;
+
+  function buildCarousel() {
+    const track  = document.getElementById('carouselTrack');
+    const dots   = document.getElementById('carouselDots');
+    const wrapper= document.getElementById('carouselWrapper');
+
+    CAROUSEL_SLIDES.forEach((slide, i) => {
+      const s = document.createElement('div');
+      s.className = 'carousel-slide' + (i === 0 ? ' active' : '');
+
+      const img = document.createElement('img');
+      img.alt = slide.title;
+      img.loading = i === 0 ? 'eager' : 'lazy';
+      img.onerror = function() {
+        if (this.src !== slide.fallback) this.src = slide.fallback;
+      };
+      img.src = slide.src;
+
+      const caption = document.createElement('div');
+      caption.className = 'slide-caption';
+      caption.innerHTML = `
+        <div class="caption-text-col">
+          <span class="caption-tag ${slide.tagType}">${slide.tag}</span>
+          <div class="caption-title">${slide.title}</div>
+          <div class="caption-sub">${slide.sub}</div>
+        </div>
+      `;
+
+      s.appendChild(img);
+      s.appendChild(caption);
+      track.appendChild(s);
+
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goToSlide(i, true));
+      dots.appendChild(dot);
+    });
+
+    wrapper.addEventListener('mouseenter', () => { isPaused = true; cancelAnimationFrame(progressRAF); });
+    wrapper.addEventListener('mouseleave', () => { isPaused = false; startProgress(); });
+
+    document.getElementById('carouselPrev').addEventListener('click', () => {
+      const prev = (currentSlide - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length;
+      goToSlide(prev, true);
+    });
+    document.getElementById('carouselNext').addEventListener('click', () => {
+      const next = (currentSlide + 1) % CAROUSEL_SLIDES.length;
+      goToSlide(next, true);
+    });
+
+    let touchStartX = 0;
+    const wrapper2 = document.getElementById('carouselWrapper');
+    wrapper2.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    wrapper2.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) {
+        goToSlide(dx < 0
+          ? (currentSlide + 1) % CAROUSEL_SLIDES.length
+          : (currentSlide - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length, true);
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft')  goToSlide((currentSlide - 1 + CAROUSEL_SLIDES.length) % CAROUSEL_SLIDES.length, true);
+      if (e.key === 'ArrowRight') goToSlide((currentSlide + 1) % CAROUSEL_SLIDES.length, true);
+    });
+
+    startProgress();
+  }
+
+  function goToSlide(index, resetTimer) {
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots   = document.querySelectorAll('.carousel-dot');
+
+    slides[currentSlide].classList.remove('active');
+    slides[index].classList.add('active');
+    dots[currentSlide].classList.remove('active');
+    dots[index].classList.add('active');
+
+    currentSlide = index;
+    document.getElementById('carouselTrack').style.transform = `translateX(-${index * 100}%)`;
+
+    if (resetTimer) startProgress();
+  }
+
+  function startProgress() {
+    cancelAnimationFrame(progressRAF);
+    clearTimeout(autoplayTimer);
+    progressStart = performance.now();
+    animateProgress();
+  }
+
+  function animateProgress() {
+    if (isPaused) return;
+    const elapsed = performance.now() - progressStart;
+    const pct = Math.min((elapsed / AUTOPLAY_INTERVAL) * 100, 100);
+    document.getElementById('carouselProgressBar').style.width = pct + '%';
+    if (pct < 100) {
+      progressRAF = requestAnimationFrame(animateProgress);
+    } else {
+      const next = (currentSlide + 1) % CAROUSEL_SLIDES.length;
+      goToSlide(next, false);
+      progressStart = performance.now();
+      progressRAF = requestAnimationFrame(animateProgress);
+    }
+  }
+
+  /* ===================== CHART.JS SETUP ===================== */
+  const SHEET_CONFIG = {
+    sheetId: "1y4wSY4XmaXP33zYPWnMN4oNo6rowPtDjeP_7sg-hwgc",
+    apiKey:  "AIzaSyDsmRcL_UOzyowHivqZPyo6QIUL6b_92wk",
+    range:   "Sheet1!A2:N1000"
+  };
+
+  const PALETTE = ['#00703C','#1d63cc','#F5A623','#10b981','#3b82f6','#f59e0b','#06b6d4','#8b5cf6'];
+
+  let chartStatus = null, chartDana = null;
+  let aggregatedTableData = [];
+  let maxTableTotal = 1;
+
+  let sortState = { field: 'nilai', dir: 'desc' };
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    buildCarousel();
+    updateTimestamp();
+    setStatus('loading','Memuat data…');
+
+    document.getElementById('btnRefresh').addEventListener('click', refreshData);
+    document.getElementById('tableSearch').addEventListener('input', (e) => {
+      displayTableRows(e.target.value);
+    });
+
+    document.getElementById('thNilai').addEventListener('click', () => {
+      if (sortState.field === 'nilai') {
+        sortState.dir = sortState.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        sortState.field = 'nilai'; sortState.dir = 'desc';
+      }
+      updateSortUI();
+      displayTableRows(document.getElementById('tableSearch').value);
+    });
+    document.getElementById('thJumlah').addEventListener('click', () => {
+      if (sortState.field === 'jumlah') {
+        sortState.dir = sortState.dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        sortState.field = 'jumlah'; sortState.dir = 'desc';
+      }
+      updateSortUI();
+      displayTableRows(document.getElementById('tableSearch').value);
+    });
+
+    updateSortUI();
+    await loadData();
+    setInterval(refreshData, 5 * 60 * 1000);
+  });
+
+  function updateSortUI() {
+    const thNilai  = document.getElementById('thNilai');
+    const thJumlah = document.getElementById('thJumlah');
+    [thNilai, thJumlah].forEach(t => t.classList.remove('sort-asc','sort-desc'));
+    if (sortState.field === 'nilai') {
+      thNilai.classList.add(sortState.dir === 'desc' ? 'sort-desc' : 'sort-asc');
+    } else if (sortState.field === 'jumlah') {
+      thJumlah.classList.add(sortState.dir === 'desc' ? 'sort-desc' : 'sort-asc');
+    }
+  }
+
+  async function loadData() {
+    try {
+      const data = await fetchSheets();
+      if (data && data.length > 0) {
+        renderDashboard(data);
+        setStatus('online', `${data.length} data dimuat`);
+      } else { setStatus('error','Data kosong'); }
+    } catch(e) {
+      console.error(e);
+      setStatus('error','Gagal memuat');
+      toast('Gagal mengambil data dari Google Sheets.');
+    }
+  }
+
+  async function fetchSheets() {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_CONFIG.sheetId}/values/${SHEET_CONFIG.range}?key=${SHEET_CONFIG.apiKey}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    if (!json.values || !json.values.length) return [];
+    return json.values.map((row, i) => ({
+      no:            row[0]  || (i+1).toString(),
+      namaProyek:    row[4]  || '',
+      nilaiProyek:   parseCurrency(row[5] || '0'),
+      sumberDana:    row[6]  || 'Tidak Diketahui',
+      namaInstansi:  row[8]  || 'Tidak Diketahui',
+      statusPotensi: row[11] || 'Tidak Diketahui',
+    })).filter(d => d.namaProyek && d.namaProyek.trim() !== '');
+  }
+
+  function parseCurrency(v) {
+    if (typeof v === 'number') return v;
+    return parseFloat(String(v).replace(/[^\d.-]/g,'')) || 0;
+  }
+
+  function computePotensiIuran(amount) {
+    const tiers = [
+      {cap:100_000_000,rate:0.0024},{cap:500_000_000,rate:0.0019},
+      {cap:1_000_000_000,rate:0.0015},{cap:5_000_000_000,rate:0.0012},
+      {cap:Infinity,rate:0.0010}
+    ];
+    let p = 0, prev = 0;
+    for (const t of tiers) {
+      const u = Math.max(0, Math.min(amount, t.cap) - prev);
+      if (!u) { prev = t.cap; continue; }
+      p += u * t.rate; prev = t.cap;
+      if (prev >= amount) break;
+    }
+    return p;
+  }
+
+  function fmt(n) {
+    return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0,maximumFractionDigits:0}).format(n);
+  }
+  function fmtShort(n) {
+    if (n >= 1e12) return (n/1e12).toFixed(1)+' T';
+    if (n >= 1e9)  return (n/1e9).toFixed(1)+' M';
+    if (n >= 1e6)  return (n/1e6).toFixed(1)+' jt';
+    if (n >= 1e3)  return (n/1e3).toFixed(0)+' rb';
+    return n.toString();
+  }
+
+  function renderDashboard(data) {
+    renderKPI(data);
+    renderStatusChart(data);
+    renderDanaChart(data);
+    prepareTableData(data);
+  }
+
+  function renderKPI(data) {
+    const nilai = data.reduce((s,d) => s + (d.nilaiProyek||0), 0);
+    const pot   = computePotensiIuran(nilai);
+    document.getElementById('totalProjects').textContent = data.length.toLocaleString('id-ID');
+    document.getElementById('totalValue').textContent    = fmt(nilai);
+    document.getElementById('potensiValue').textContent  = fmt(pot);
+  }
+
+  function normalizeStatus(s) {
+    const x = String(s ?? '').normalize('NFKC').trim().toUpperCase().replace(/\s+/g,' ');
+    if (['BELUM TL','BELUM_TL','BELUM-TL','TIDAK VALID','TIDAK_VALID','VALID'].includes(x)) return 'Belum Terdaftar';
+    if (x === 'TERDAFTAR') return 'Terdaftar';
+    if (x === 'BATAL') return 'Batal';
+    return x.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  /* ===================== STATUS CHART ===================== */
+  function renderStatusChart(data) {
+    const counts = {}, potensis = {};
+    data.forEach(p => {
+      const s   = normalizeStatus(p.statusPotensi);
+      const pot = computePotensiIuran(Number(p.nilaiProyek) || 0);
+      counts[s]   = (counts[s]   || 0) + 1;
+      potensis[s] = (potensis[s] || 0) + pot;
+    });
+
+    const labels     = Object.keys(counts);
+    const values     = labels.map(l => counts[l]);
+    const potArr     = labels.map(l => potensis[l] || 0);
+    const totalCount = values.reduce((a, b) => a + b, 0);
+    const totalPot   = potArr.reduce((a, b) => a + b, 0);
+
+    const colorMap = {
+      'terdaftar':       '#00703C',
+      'belum terdaftar': '#ef4444',
+      'batal':           '#9ca3af'
+    };
+    const acMap = {
+      'terdaftar':       'g-ac',
+      'belum terdaftar': 'r-ac',
+      'batal':           'gr-ac'
+    };
+    const colors = labels.map(l => colorMap[l.toLowerCase()] || '#7a9e89');
+
+    document.getElementById('statusBadge').textContent = `${data.length} proyek`;
+
+    /* ── Legend — struktur identik dengan widget Sumber Anggaran ── */
+    const leg = document.getElementById('statusLegend');
+    leg.innerHTML = '';
+    labels.forEach((lbl, i) => {
+      const pctCount = totalCount ? (values[i] / totalCount * 100).toFixed(1) : '0.0';
+      const ac       = acMap[lbl.toLowerCase()] || 'g-ac';
+
+      const item = document.createElement('div');
+      item.className = `legend-item ${ac}`;
+      item.innerHTML = `
+        <div class="legend-label">${lbl}</div>
+        <div class="legend-count-row">
+          <span class="legend-count-num">${values[i].toLocaleString('id-ID')}</span>
+          <span class="legend-count-unit">proyek</span>
+          <span class="legend-pct-badge">${pctCount}%</span>
+        </div>
+        <div class="legend-iuran">${fmt(potArr[i])}</div>
+      `;
+      item.onclick = () => window.location.href = `detail-status.html?status=${encodeURIComponent(lbl)}`;
+      leg.appendChild(item);
+    });
+
+    /* ── Custom plugin: curved text following each arc ── */
+    const curvedArcLabels = {
+      id: 'curvedArcLabels',
+      afterDraw(chart) {
+        if (chart.config.type !== 'doughnut') return;
+        const { ctx } = chart;
+        const dataset = chart.data.datasets[0];
+        const meta    = chart.getDatasetMeta(0);
+        const tot     = dataset.data.reduce((a, b) => a + b, 0);
+        if (!tot) return;
+
+        meta.data.forEach((arc, idx) => {
+          const val    = dataset.data[idx];
+          const pctNum = (val / tot) * 100;
+          if (pctNum < 5) return; // skip tiny slices
+
+          const text      = pctNum.toFixed(1) + '%';
+          const midAngle  = (arc.startAngle + arc.endAngle) / 2;
+          const arcSpan   = arc.endAngle - arc.startAngle;
+
+          /* Place text on the middle ring of the donut */
+          const r = (arc.outerRadius * 0.68 + arc.innerRadius * 0.32);
+
+          ctx.save();
+          ctx.font         = '800 12.5px "Plus Jakarta Sans", sans-serif';
+          ctx.fillStyle    = '#ffffff';
+          ctx.textAlign    = 'center';
+          ctx.textBaseline = 'middle';
+
+          /* Measure total angular span of text */
+          let totalWidth = 0;
+          for (const ch of text) totalWidth += ctx.measureText(ch).width * 1.08;
+          const totalSpan = totalWidth / r;
+
+          /* If text is wider than the arc, scale down font */
+          let scale = 1;
+          if (totalSpan > arcSpan * 0.88) {
+            scale = (arcSpan * 0.88) / totalSpan;
+            ctx.font = `800 ${(12.5 * scale).toFixed(1)}px "Plus Jakarta Sans", sans-serif`;
+            totalWidth = 0;
+            for (const ch of text) totalWidth += ctx.measureText(ch).width * 1.08;
+          }
+
+          let curAngle = midAngle - (totalWidth / r) / 2;
+
+          for (const ch of text) {
+            const cw      = ctx.measureText(ch).width * 1.08;
+            const caSpan  = cw / r;
+            const angle   = curAngle + caSpan / 2;
+
+            ctx.save();
+            ctx.translate(
+              arc.x + r * Math.cos(angle),
+              arc.y + r * Math.sin(angle)
+            );
+            /* Rotate character to follow the arc tangent */
+            ctx.rotate(angle + Math.PI / 2);
+
+            /* Shadow for legibility */
+            ctx.shadowColor  = 'rgba(0,0,0,0.75)';
+            ctx.shadowBlur   = 7;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            ctx.fillText(ch, 0, 0);
+            ctx.restore();
+
+            curAngle += caSpan;
+          }
+          ctx.restore();
+        });
+      }
+    };
+
+    /* Chart */
+    if (chartStatus) { chartStatus.destroy(); chartStatus = null; }
+    chartStatus = new Chart(
+      document.getElementById('statusChart').getContext('2d'),
+      {
+        type: 'doughnut',
+        plugins: [curvedArcLabels],
+        data: {
+          labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors,
+            borderWidth: 3,
+            borderColor: '#fff',
+            hoverBorderWidth: 4,
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '58%',
+          animation: { duration: 700 },
+          plugins: {
+            legend: { display: false },
+            /* Disable global datalabels for this chart */
+            datalabels: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => {
+                  const i   = ctx.dataIndex;
+                  const pct = totalCount ? (values[i] / totalCount * 100).toFixed(1) : '0.0';
+                  return [
+                    `${ctx.label}: ${values[i]} proyek (${pct}%)`,
+                    `Potensi Iuran: ${fmt(potArr[i])}`
+                  ];
+                }
+              }
+            }
+          }
+        }
+      }
+    );
+  }
+
+  function renderDanaChart(data) {
+    const vals = {};
+    data.forEach(p => {
+      const s = p.sumberDana || 'Tidak Diketahui';
+      vals[s] = (vals[s] || 0) + (Number(p.nilaiProyek) || 0);
+    });
+    const labels = Object.keys(vals);
+    const values = labels.map(l => vals[l]);
+    const total  = values.reduce((a,b) => a+b, 0);
+    const colors = labels.map((_, i) => PALETTE[i % PALETTE.length]);
+
+    document.getElementById('danaBadge').textContent = `${labels.length} sumber`;
+
+    const legAcs = ['g-ac','n-ac','gd-ac','cy-ac','r-ac'];
+    const leg = document.getElementById('danaLegend');
+    leg.innerHTML = '';
+    labels.forEach((lbl, i) => {
+      const pct  = total ? (values[i]/total*100).toFixed(1) : 0;
+      const item = document.createElement('div');
+      item.className = `legend-item ${legAcs[i % legAcs.length]}`;
+      item.innerHTML = `
+        <div class="legend-label">${lbl}</div>
+        <div class="legend-iuran">${fmt(values[i])}</div>
+        <div class="legend-pct">${pct}%</div>
+      `;
+      leg.appendChild(item);
+    });
+
+    if (chartDana) { chartDana.destroy(); chartDana = null; }
+    chartDana = new Chart(document.getElementById('sumberDanaChart').getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 5, borderSkipped: false }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        layout: { padding: { top: 20 } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 30 } },
+          y: { beginAtZero: true, grid: { color: '#e0f2e9' }, ticks: { font: { size: 10 }, callback: v => fmtShort(v) } }
+        },
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            color: '#0d1f14', anchor: 'end', align: 'top', offset: 2,
+            font: { weight: '800', size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+            formatter: (value, ctx) => {
+              let sum = ctx.dataset.data.reduce((a, b) => a + b, 0);
+              if (value === 0) return '';
+              return (value * 100 / sum).toFixed(1) + '%';
+            }
+          },
+          tooltip: { callbacks: { label: ctx => {
+            const v = Number(ctx.raw) || 0;
+            const pct = total ? (v/total*100).toFixed(1) : 0;
+            return `${ctx.label}: ${fmt(v)} (${pct}%)`;
+          }}}
+        }
+      }
+    });
+  }
+
+  function prepareTableData(data) {
+    const counts = {}, totals = {};
+    data.forEach(p => {
+      const k = p.namaInstansi || 'Tidak Diketahui';
+      counts[k] = (counts[k] || 0) + 1;
+      totals[k] = (totals[k] || 0) + (p.nilaiProyek || 0);
+    });
+
+    aggregatedTableData = Object.keys(counts).map(inst => ({
+      instansi: inst,
+      count: counts[inst],
+      total: totals[inst]
+    }));
+
+    maxTableTotal = Math.max(...aggregatedTableData.map(d => d.total), 1);
+
+    document.getElementById('tableSearch').value = '';
+    displayTableRows('');
+  }
+
+  function getSortedData(filtered) {
+    const { field, dir } = sortState;
+    if (!field) return filtered;
+    return [...filtered].sort((a, b) => {
+      const va = field === 'nilai' ? a.total : a.count;
+      const vb = field === 'nilai' ? b.total : b.count;
+      return dir === 'desc' ? vb - va : va - vb;
+    });
+  }
+
+  function displayTableRows(query) {
+    const tbody = document.getElementById('mainTableBody');
+    tbody.innerHTML = '';
+
+    const filtered = aggregatedTableData.filter(item =>
+      item.instansi.toLowerCase().includes(query.toLowerCase())
+    );
+
+    const sorted = getSortedData(filtered);
+
+    document.getElementById('tableBadge').textContent = `${sorted.length} instansi`;
+
+    if (sorted.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-3);">Tidak ada data yang cocok dengan "${query}"</td></tr>`;
+      return;
+    }
+
+    sorted.forEach((item, i) => {
+      const pct = (item.total / maxTableTotal * 100).toFixed(1);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>
+          <a href="detail.html?instansi=${encodeURIComponent(item.instansi)}" class="inst-name" title="${item.instansi}">${item.instansi}</a>
+        </td>
+        <td class="col-nilai">
+          <div class="nilai-wrap">
+            <span class="nilai-text">${fmt(item.total)}</span>
+            <div class="nilai-bar-bg"><div class="nilai-bar" style="width:${pct}%"></div></div>
+          </div>
+        </td>
+        <td><span class="badge-count">${item.count}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function setStatus(type, msg) {
+    document.getElementById('statusDot').className    = `status-dot ${type}`;
+    document.getElementById('statusText').textContent = msg;
+  }
+  function updateTimestamp() {
+    const ts = document.getElementById('navTimestamp');
+    if (!ts) return;
+    ts.textContent = new Date().toLocaleString('id-ID', {
+      day:'2-digit', month:'short', year:'numeric',
+      hour:'2-digit', minute:'2-digit', hour12:false, timeZone:'Asia/Jakarta'
+    });
+  }
+  function refreshData() { setStatus('loading','Memuat ulang…'); updateTimestamp(); loadData(); }
+  function toast(msg) {
+    const el = document.createElement('div');
+    el.style.cssText = `position:fixed;top:80px;right:20px;background:#ef4444;color:#fff;padding:12px 18px;border-radius:10px;font-size:0.82rem;font-weight:600;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,0.2);max-width:280px;`;
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+  }
+  </script>
+</body>
+</html>
